@@ -19,7 +19,7 @@ SELECT
 
 POP_AUTHOR_QUERY = '''
 SELECT
-    au.name AS name, sum(au.id) AS total_views
+    au.name AS name, COUNT(au.id) AS total_views
   FROM authors AS au
   LEFT JOIN
     articles AS ar
