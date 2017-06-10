@@ -5,40 +5,42 @@ import psycopg2
 DBNAME = "news"
 
 POP_ARTICLE_QUERY = '''
-SELECT 
-    a.title, count(a.title) AS views 
-  FROM articles AS a 
-  LEFT JOIN 
-    log AS l 
-    ON 
-      CONCAT('/article/', a.slug) = l.path 
-  GROUP BY a.title 
-  ORDER BY views DESC 
+SELECT
+    a.title, count(a.title) AS views
+  FROM articles AS a
+  LEFT JOIN
+    log AS l
+    ON
+      CONCAT('/article/', a.slug) = l.path
+  GROUP BY a.title
+  ORDER BY views DESC
   LIMIT 3;
 '''
 
 POP_AUTHOR_QUERY = '''
-SELECT 
-    au.name AS name, sum(au.id) AS total_views 
-  FROM authors AS au 
-  LEFT JOIN 
-    articles AS ar 
-    ON 
-      au.id=ar.author 
-  LEFT JOIN 
-    log AS l 
-    ON CONCAT('/article/', ar.slug) = l.path 
-  GROUP BY au.id 
+SELECT
+    au.name AS name, sum(au.id) AS total_views
+  FROM authors AS au
+  LEFT JOIN
+    articles AS ar
+    ON
+      au.id=ar.author
+  LEFT JOIN
+    log AS l
+    ON CONCAT('/article/', ar.slug) = l.path
+  GROUP BY au.id
   ORDER BY total_views DESC;
 '''
 
 ERROR_QUERY = '''
-SELECT 
-    t1.d, total_requests, error_requests 
+SELECT
+    t1.d, total_requests, error_requests
   FROM
-    (SELECT DATE(time) AS d, COUNT(*) AS total_requests FROM log GROUP BY d) t1,
-    (SELECT DATE(time) AS d, COUNT(*) AS error_requests FROM log WHERE status <> '200 OK' GROUP BY d) t2
-  WHERE 
+    (SELECT DATE(time) AS d, COUNT(*) AS total_requests
+       FROM log GROUP BY d) t1,
+    (SELECT DATE(time) AS d, COUNT(*) AS error_requests
+       FROM log WHERE status <> '200 OK' GROUP BY d) t2
+  WHERE
     t1.d=t2.d AND error_requests > total_requests/100;
 '''
 
